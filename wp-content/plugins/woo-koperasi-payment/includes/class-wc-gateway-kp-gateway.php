@@ -5,16 +5,14 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 /* Log to File
 * Description: Log into system php error log, usefull for Ajax and stuff that FirePHP doesn't catch
 */
-function my_log_file( $msg, $name = '[KP]' )
+function my_log_file( $msg)
 {
-    // Print the name of the calling function if $name is left empty
-    $trace=debug_backtrace();
-    $name = ( '' == $name ) ? $trace[1]['function'] : $name;
-
-    $error_dir = 'D:xampp/apache/logs/error.log';
-    $msg = print_r( $msg, true );
-    $log = $name . "  |  " . $msg . "\n";
-    error_log( $log, 3, $error_dir );
+    static $logger;
+    if ( ! isset( $logger ) ) {
+		$logger = wc_get_logger();
+    }
+    $log = "[KP]  |  " . $msg . "\n";
+    $logger->debug($log);
 }
 
 class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
@@ -82,7 +80,8 @@ class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
 	 */
 	public function process_payment( $order_id ) {
 
-		$order = wc_get_order( $order_id );
+        $order = wc_get_order( $order_id );
+        $email = $order->get_billing_email();
 
         $price = $order->get_total();
 		if ( $price > 0 ) {
@@ -99,17 +98,16 @@ class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
             }
             
             // Perform queries
-            $sql = "UPDATE akun SET saldo = saldo - ".$price." WHERE akun_id = 1";
+            $sql = "UPDATE akun SET saldo = saldo - ".$price." WHERE email LIKE '".$email."'";
             if ($conn->query($sql) === TRUE) {
-                my_log_file( "Record updated successfully");
+                my_log_file( "Record updated successfully to akun ".$email);
             } else {
                 my_log_file( "Error updating record: " . $conn->error);
             }
 
             $conn->close();
-		} else {
-			$order->payment_complete();
 		}
+        $order->payment_complete();
 
 		// Reduce stock levels
 		wc_reduce_stock_levels( $order_id );
