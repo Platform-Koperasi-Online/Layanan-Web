@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
-class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
+class WC_Gateway_KP_Payment_Gateway extends WC_Payment_Gateway {
     private $koperasi_bank_email;
 
     public function __construct() {
@@ -75,7 +75,7 @@ class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
 
         $price = $order->get_total();
 		if ( $price > 0 ) {
-            $bank = new WC_Gateway_KP_Payment_Bootstrapper($this->koperasi_bank_email);
+            $bank = new WC_Gateway_KP_Bank_Bootstrapper($this->koperasi_bank_email);
             $bank->do_transaction($price, $email);
 		}
         $order->payment_complete();

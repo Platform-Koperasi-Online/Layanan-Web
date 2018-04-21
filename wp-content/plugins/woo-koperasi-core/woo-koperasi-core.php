@@ -24,16 +24,16 @@ function koperasi_core() {
 
 function declare_koperasi_core_classes() {
     require_once('includes/class-wc-gateway-kp-debugger.php');
-    require_once('includes/class-wc-gateway-kp-payment-bootstrapper.php');
+    require_once('includes/class-wc-gateway-kp-bank-bootstrapper.php');
 
     koperasi_core();
-    require_once('includes/class-wc-gateway-kp-gateway.php');
+    require_once('includes/class-wc-gateway-kp-payment-gateway.php');
 }
 
 add_action( 'plugins_loaded', 'declare_koperasi_core_classes', 1000);
 
 function add_gateway_class( $methods ) {
-    $methods[] = 'WC_Gateway_KP_Gateway'; 
+    $methods[] = 'WC_Gateway_KP_Payment_Gateway'; 
     return $methods;
 }
 

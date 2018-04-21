@@ -2,7 +2,7 @@
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
-class WC_Gateway_KP_Payment_Bootstrapper {
+class WC_Gateway_KP_Bank_Bootstrapper {
     private $servername = "localhost";
     private $username = "virtualbank";
     private $password = "virtualbank";
