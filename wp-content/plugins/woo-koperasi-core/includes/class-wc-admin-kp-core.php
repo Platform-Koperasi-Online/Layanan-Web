@@ -78,6 +78,12 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	 * Output the settings.
 	 */
 	public function output_settings() {
+		
+		// Check whether the button has been pressed AND also check the nonce
+		if (isset($_POST[$this->id.'_button']) && check_admin_referer($this->id.'_button_clicked')) {
+			self::submit_button_action();
+		}
+
 		echo "<h2>Settings</h2>";
 		echo '<form method="post" id="mainform" action="" enctype="multipart/form-data">';
 		self::admin_options();
@@ -85,27 +91,14 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
   		echo '<input type="hidden" value="true" name="'.$this->id.'_button" />';
 		echo get_submit_button();
 		echo '</form>';
-
-		// Check whether the button has been pressed AND also check the nonce
-		if (isset($_POST[$this->id.'_button']) && check_admin_referer($this->id.'_button_clicked')) {
-			self::test_button_action();
-		}
 	}
 
-	public function test_button_action() {
-		echo '<h4>The Settings that are gonna be saved</h4>';
-		foreach ($this->form_fields as $key => $value) {	
-			echo '<pre>';
-			echo $key.' => '.$_POST['woocommerce_'.$this->id.'_'.$key];
-			echo '</pre>';
+	public function submit_button_action() {
+		$options_to_save = array();
+		foreach ($this->form_fields as $key => $value) {
+			$options_to_save[$key] = $_POST['woocommerce_'.$this->id.'_'.$key];
 		}
-		echo '<h4>getting options that is saved in the db</h4>';
-		$options = get_option('woocommerce_'.$this->id.'_settings','no option stored');
-		foreach ($options as $key => $value) {
-			echo '<pre>';
-			echo $key.' => '.$value;
-			echo '</pre>';
-		}
+		update_option('woocommerce_'.$this->id.'_settings',$options_to_save);
 	}
 
 	/**
