@@ -104,11 +104,11 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
     public function init_form_fields() {
 
         $this->form_fields = array(
-            'setting1' => array(
-                'title'       => __( 'Setting 1', 'woocommerce' ),
+            'koperasi_bank_email' => array(
+                'title'       => __( 'Email Akun Bank Simpanan Koperasi', 'woocommerce' ),
                 'type'        => 'text',
-                'description' => __( 'a setting', 'woocommerce' ),
-                'default'     => __( 'nothing here yet just a default value', 'woocommerce' )
+                'description' => __( 'email untuk tujuan transaksi', 'woocommerce' ),
+                'default'     => __( '', 'woocommerce' )
             ),
             'setting2' => array(
                 'title'       => __( 'Setting 2', 'woocommerce' ),

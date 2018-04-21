@@ -20,7 +20,7 @@ class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
         $this->title        = $this->get_option( 'title' );
         $this->description  = $this->get_option( 'description' );
         $this->instructions = $this->get_option( 'instructions' );
-        $this->koperasi_bank_email = $this->get_option( 'koperasi_bank_email');
+        $this->koperasi_bank_email = koperasi_core()->get_option('koperasi_bank_email');
 
         add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
     }
@@ -57,13 +57,7 @@ class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
                 'description' => __( 'Instructions that will be added to the thank you page and emails.', 'woocommerce' ),
                 'default'     => '',
                 'desc_tip'    => true,
-            ),
-            'koperasi_bank_email' => array(
-                'title'       => __( 'Akun Simpanan Koperasi', 'woocommerce' ),
-                'type'        => 'text',
-                'description' => __( 'Akun bank untuk simpanan koperasi', 'woocommerce' ),
-                'default'     => __( '', 'woocommerce' ),
-            ),
+            )
         );
 
     }

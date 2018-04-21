@@ -10,15 +10,24 @@ Author:       Kevin Erdiza
 Author URI:   github.com/keychera
 */
 
+function koperasi_core() {
+	static $core;
+
+	if ( ! isset( $core ) ) {
+		require_once( 'includes/class-wc-admin-kp-core.php' );
+
+		$core = new WC_Admin_KP_Core_Plugin();
+	}
+
+	return $core;
+}
 
 function declare_koperasi_core_classes() {
     require_once('includes/class-wc-gateway-kp-debugger.php');
     require_once('includes/class-wc-gateway-kp-payment-bootstrapper.php');
 
-    require_once('includes/class-wc-admin-kp-core.php');
+    koperasi_core();
     require_once('includes/class-wc-gateway-kp-gateway.php');
-
-    new WC_Admin_KP_Core_Plugin();
 }
 
 add_action( 'plugins_loaded', 'declare_koperasi_core_classes', 1000);
