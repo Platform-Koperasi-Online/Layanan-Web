@@ -7,7 +7,7 @@ class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
 
     public function __construct() {
         //Gateway information
-        $this->id = 'koperasi';
+        $this->id = 'koperasi_payment';
         $this->has_fields = true;
         $this->method_title = 'Koperasi Payment';
         $this->method_description = 'Woocommerce payment plugin for Platform Koperasi';

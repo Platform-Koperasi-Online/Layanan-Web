@@ -6,6 +6,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
     private $koperasi_bank_email;
 
     public function __construct() {
+        $this->id = 'koperasi_core';
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 1000 );
     }
 
@@ -24,7 +25,6 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	public function koperasi_core_page() {
 		$koperasi_data = self::get_data();
 		echo "<h1> Hello, Koperasi </h1>";
-
 		echo '<div class="wrap woocommerce">';
 		self::output_status($koperasi_data['status']);
 		self::output_settings();
@@ -81,15 +81,31 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		echo "<h2>Settings</h2>";
 		echo '<form method="post" id="mainform" action="" enctype="multipart/form-data">';
 		self::admin_options();
-		echo self::output_submit_button();
+		wp_nonce_field($this->id.'_button_clicked');
+  		echo '<input type="hidden" value="true" name="'.$this->id.'_button" />';
+		echo get_submit_button();
 		echo '</form>';
+
+		// Check whether the button has been pressed AND also check the nonce
+		if (isset($_POST[$this->id.'_button']) && check_admin_referer($this->id.'_button_clicked')) {
+			self::test_button_action();
+		}
 	}
 
-	public function output_submit_button() {
-		echo '
-		<p class="submit">
-			<button name="save" class="button-primary woocommerce-save-button" type="submit" value="Save changes">Save changes</button>
-		</p>';
+	public function test_button_action() {
+		echo '<h4>The Settings that are gonna be saved</h4>';
+		foreach ($this->form_fields as $key => $value) {	
+			echo '<pre>';
+			echo $key.' => '.$_POST['woocommerce_'.$this->id.'_'.$key];
+			echo '</pre>';
+		}
+		echo '<h4>getting options that is saved in the db</h4>';
+		$options = get_option('woocommerce_'.$this->id.'_settings','no option stored');
+		foreach ($options as $key => $value) {
+			echo '<pre>';
+			echo $key.' => '.$value;
+			echo '</pre>';
+		}
 	}
 
 	/**
