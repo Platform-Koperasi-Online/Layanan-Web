@@ -2,19 +2,6 @@
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
-/* Log to File
-* Description: Log into system php error log, usefull for Ajax and stuff that FirePHP doesn't catch
-*/
-function my_log_file( $msg)
-{
-    static $logger;
-    if ( ! isset( $logger ) ) {
-		$logger = wc_get_logger();
-    }
-    $log = "[KP]  |  " . $msg . "\n";
-    $logger->debug($log);
-}
-
 class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
     public function __construct() {
         //Gateway information
@@ -85,27 +72,8 @@ class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
 
         $price = $order->get_total();
 		if ( $price > 0 ) {
-            $servername = "localhost";
-            $username = "virtualbank";
-            $password = "virtualbank";
-            $dbname = "virtualbank";
-
-            $conn = new mysqli($servername, $username, $password, $dbname);
-            
-            // Check connection
-            if ($conn->connect_error) {
-                my_log_file( "Failed to connect to MySQL: " .  $conn->connect_error);
-            }
-            
-            // Perform queries
-            $sql = "UPDATE akun SET saldo = saldo - ".$price." WHERE email LIKE '".$email."'";
-            if ($conn->query($sql) === TRUE) {
-                my_log_file( "Record updated successfully to akun ".$email);
-            } else {
-                my_log_file( "Error updating record: " . $conn->error);
-            }
-
-            $conn->close();
+            $bank = new WC_Gateway_KP_Payment_Bootstrapper();
+            $bank->do_transaction($price, $email);
 		}
         $order->payment_complete();
 

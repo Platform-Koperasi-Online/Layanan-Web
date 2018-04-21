@@ -12,6 +12,9 @@ Author URI:   github.com/keychera
 
 
 function declare_koperasi_gateway_class() {
+    require_once('includes/class-wc-gateway-kp-debugger.php');
+    require_once('includes/class-wc-gateway-kp-payment-bootstrapper.php');
+
     require_once('includes/class-wc-gateway-kp-gateway.php');
 }
 
