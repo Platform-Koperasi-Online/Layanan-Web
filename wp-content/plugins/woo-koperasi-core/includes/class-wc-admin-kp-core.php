@@ -34,15 +34,11 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	public function get_data() {
 		$data =  array(
 			'status' => array(
-				'Top level' => array(
-					'hey' => 5,
-					'hgd' => 142,
-					'h2d' => 1322,
+				'Anggota Koperasi' => array(
+					'Jumlah anggota' => 5,
 				),
-				'another Top level' => array(
-					'hey' => 5,
-					'hgd' => 142,
-					'h2d' => 1322,
+				'Simpanan Koperasi' => array(
+					'Saldo' => 5,
 				)
 			)
 		);
@@ -55,18 +51,19 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	public function output_status($status) {
 		foreach ($status as $status_header => $status_info) {
 			echo '
-			<table class="wc_status_table widefat" cellspacing="0">
+			<table class="wc_status_table widefat" cellspacing="0" style="width:50%;table-layout:fixed">
+				<col style="width:10%" span="5"/>
 				<thead>
 					<tr>
-						<th colspan="3"><h2>'.$status_header.'</h2></th>
+						<th colspan="5"><h2>'.$status_header.'</h2></th>
 					</tr>
 				</thead>
 				<tbody>';
 			foreach ($status_info as $key => $value) {
 				echo'	
 					<tr>
-						<td>'.$key.'</td>
-						<td>'.$value.'</td>
+						<td colspan="2">'.$key.'</td>
+						<td colspan="3">'.$value.'</td>
 					</tr>
 				';
 			}
