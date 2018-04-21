@@ -3,6 +3,8 @@
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
+    private $koperasi_bank_email;
+
     public function __construct() {
         //Gateway information
         $this->id = 'koperasi';
@@ -18,6 +20,7 @@ class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
         $this->title        = $this->get_option( 'title' );
         $this->description  = $this->get_option( 'description' );
         $this->instructions = $this->get_option( 'instructions' );
+        $this->koperasi_bank_email = $this->get_option( 'koperasi_bank_email');
 
         add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
     }
@@ -55,6 +58,12 @@ class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
                 'default'     => '',
                 'desc_tip'    => true,
             ),
+            'koperasi_bank_email' => array(
+                'title'       => __( 'Akun Simpanan Koperasi', 'woocommerce' ),
+                'type'        => 'text',
+                'description' => __( 'Akun bank untuk simpanan koperasi', 'woocommerce' ),
+                'default'     => __( '', 'woocommerce' ),
+            ),
         );
 
     }
@@ -72,7 +81,7 @@ class WC_Gateway_KP_Gateway extends WC_Payment_Gateway {
 
         $price = $order->get_total();
 		if ( $price > 0 ) {
-            $bank = new WC_Gateway_KP_Payment_Bootstrapper();
+            $bank = new WC_Gateway_KP_Payment_Bootstrapper($this->koperasi_bank_email);
             $bank->do_transaction($price, $email);
 		}
         $order->payment_complete();

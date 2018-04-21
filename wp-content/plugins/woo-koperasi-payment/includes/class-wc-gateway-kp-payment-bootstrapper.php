@@ -8,7 +8,13 @@ class WC_Gateway_KP_Payment_Bootstrapper {
     private $password = "virtualbank";
     private $dbname = "virtualbank";
 
-    function do_transaction($price, $email) {
+    private $receiver_email;
+
+    function __construct($receiver_email) {
+        $this->receiver_email = $receiver_email;
+    }
+
+    function do_transaction($price, $sender_email) {
         $conn = new mysqli(
             $this->servername, 
             $this->username, 
@@ -21,9 +27,16 @@ class WC_Gateway_KP_Payment_Bootstrapper {
         }
 
         // Perform queries
-        $sql = "UPDATE akun SET saldo = saldo - ".$price." WHERE email LIKE '".$email."'";
+        $sql = "UPDATE akun SET saldo = saldo - ".$price." WHERE email LIKE '".$sender_email."'";
         if ($conn->query($sql) === TRUE) {
-            kp_log_to_file( "Record updated successfully to akun ".$email);
+            kp_log_to_file( "Saldo of ".$price." successfully substracted from akun ".$sender_email);
+        } else {
+            kp_log_to_file( "Error updating record: " . $conn->error);
+        }
+        $receiver_email = $this->receiver_email;
+        $sql = "UPDATE akun SET saldo = saldo + ".$price." WHERE email LIKE '".$receiver_email."'";
+        if ($conn->query($sql) === TRUE) {
+            kp_log_to_file( "Saldo of ".$price." successfully added to akun ".$receiver_email);
         } else {
             kp_log_to_file( "Error updating record: " . $conn->error);
         }
