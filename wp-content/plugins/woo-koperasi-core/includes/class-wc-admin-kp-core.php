@@ -72,7 +72,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		echo "<h1> Hello, Koperasi </h1>";
 		echo '<div class="wrap woocommerce">';
 		self::output_status($koperasi_data['status']);
-		self::output_dummy_anggota_page($koperasi_data['customers'],$koperasi_data['status']);
+		self::output_dummy_anggota_page($koperasi_data['customers'],$koperasi_data['shu_data']);
 		self::output_settings();
 		echo '</div>';
 	}
@@ -91,18 +91,25 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 					'Jumlah anggota' => self::count_anggota($customer_data),
 				),
 				'Simpanan Koperasi' => array(
-					'Simpanan dari anggota' => $simpanan_dari_anggota,
-					'Simpanan dari donasi' => $simpanan_dari_donasi,
-					'Total' => $simpanan_dari_anggota + $simpanan_dari_donasi
+					'Simpanan dari anggota' => wc_price($simpanan_dari_anggota),
+					'Simpanan dari donasi' => wc_price($simpanan_dari_donasi),
+					'Total' => wc_price($simpanan_dari_anggota + $simpanan_dari_donasi)
 				),
 				'Simulasi Perhitungan SHU' => array(
-					'SHU simulasi' => $shu_simulasi,
-					'Total Penjualan simulasi' => $total_penjualan_simulasi,
-					'Persen Jasa Modal' => $persen_jasa_modal,
-					'Persen Jasa Usaha' => $persen_jasa_usaha,
+					'SHU Simulasi' => wc_price($shu_simulasi),
+					'Total Penjualan Simulasi' => wc_price($total_penjualan_simulasi),
+					'Persen Jasa Modal' => $persen_jasa_modal . ' %',
+					'Persen Jasa Usaha' => $persen_jasa_usaha . ' %',
 				)
 			),
 			'customers' => $customer_data,
+			'shu_data' => array (
+				'simpanan_total' => $simpanan_dari_anggota + $simpanan_dari_donasi,
+				'shu_simulasi' => $shu_simulasi,
+				'total_penjualan_simulasi' => $total_penjualan_simulasi,
+				'persen_jasa_modal' => $persen_jasa_modal,
+				'persen_jasa_usaha' => $persen_jasa_usaha,
+			)
 		);
 		return $data;
 	}
@@ -182,12 +189,12 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		}
 	}
 
-	public function output_dummy_anggota_page($customers,$koperasi_data) {
-		$shu_simulasi = $koperasi_data['Simulasi Perhitungan SHU']['SHU simulasi'];
-		$persen_jasa_modal = $koperasi_data['Simulasi Perhitungan SHU']['Persen Jasa Modal'];
-		$persen_jasa_usaha = $koperasi_data['Simulasi Perhitungan SHU']['Persen Jasa Usaha'];
-		$total_penjualan = $koperasi_data['Simulasi Perhitungan SHU']['Total Penjualan simulasi'];
-		$simpanan = $koperasi_data['Simpanan Koperasi']['Total'];
+	public function output_dummy_anggota_page($customers,$shu_data) {
+		$shu_simulasi = $shu_data['shu_simulasi'];
+		$persen_jasa_modal = $shu_data['persen_jasa_modal'];
+		$persen_jasa_usaha = $shu_data['persen_jasa_usaha'];
+		$total_penjualan_simulasi = $shu_data['total_penjualan_simulasi'];
+		$simpanan = $shu_data['simpanan_total'];
 		
 
 		echo "<h2>Cek customer</h2>";
@@ -208,16 +215,16 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 				<tbody>';
 		foreach ($customers as $customer_id => $customer_data) {
 			$dari_jasa_modal = self::calculate_yang_didapat($simpanan, $shu_simulasi, $persen_jasa_modal, $customer_data['simpanan_koperasi']);
-			$dari_jasa_usaha = self::calculate_yang_didapat($total_penjualan, $shu_simulasi, $persen_jasa_usaha, $customer_data['total_spent']);
+			$dari_jasa_usaha = self::calculate_yang_didapat($total_penjualan_simulasi, $shu_simulasi, $persen_jasa_usaha, $customer_data['total_spent']);
 			echo '
 			<tr>
 				<td colspan="1">'.$customer_data['name'].' </td>
 				<td colspan="1">'.self::get_member_text($customer_data['is_a_koperasi_member']).' </td>
-				<td colspan="1">'.$customer_data['simpanan_koperasi'].' </td>
-				<td colspan="1">'.$customer_data['total_spent'].' </td>
-				<td colspan="1">'.$dari_jasa_modal.' </td>
-				<td colspan="1">'.$dari_jasa_usaha.' </td>
-				<td colspan="1">'.($dari_jasa_modal + $dari_jasa_modal).' </td>
+				<td colspan="1">'.wc_price($customer_data['simpanan_koperasi']).' </td>
+				<td colspan="1">'.wc_price($customer_data['total_spent']).' </td>
+				<td colspan="1">'.wc_price($dari_jasa_modal).' </td>
+				<td colspan="1">'.wc_price($dari_jasa_usaha).' </td>
+				<td colspan="1">'.wc_price($dari_jasa_modal + $dari_jasa_usaha).' </td>
 			</tr>';
 		}
 		echo '</tbody></table>';
@@ -270,14 +277,14 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
             ),
             'shu_simulasi' => array(
                 'title'       => __( 'SHU Simulasi', 'woocommerce' ),
-                'type'        => 'text',
+                'type'        => 'price',
                 'description' => __( 'nilai SHU untuk dihitung', 'woocommerce' ),
                 'default'     => __( '10000000', 'woocommerce' )
 			),
 			'total_penjualan_simulasi' => array(
                 'title'       => __( 'Total Penjualan Simulasi', 'woocommerce' ),
-                'type'        => 'text',
-                'description' => __( 'nilai SHU untuk dihitung', 'woocommerce' ),
+                'type'        => 'price',
+                'description' => __( 'nilai Total Penjualan untuk dihitung', 'woocommerce' ),
                 'default'     => __( '35000000', 'woocommerce' )
 			),
 			'persen_jasa_modal' => array(
