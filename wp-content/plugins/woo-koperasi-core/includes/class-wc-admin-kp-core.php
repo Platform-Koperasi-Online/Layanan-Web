@@ -77,6 +77,9 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		$customer_data = self::get_filtered_customers_data();
 		$simpanan_dari_anggota = self::count_simpanan($customer_data);
 		$simpanan_dari_donasi = self::get_simpanan_donasi();
+		$shu_simulasi = $this->get_option('shu_simulasi');
+		$persen_jasa_usaha = $this->get_option('persen_jasa_usaha');
+		$persen_jasa_modal = $this->get_option('persen_jasa_modal');
 		$data =  array(
 			'status' => array(
 				'Anggota Koperasi' => array(
@@ -86,6 +89,11 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 					'Simpanan dari anggota' => $simpanan_dari_anggota,
 					'Simpanan dari donasi' => $simpanan_dari_donasi,
 					'Total' => $simpanan_dari_anggota + $simpanan_dari_donasi
+				),
+				'Simulasi Perhitungan SHU' => array(
+					'SHU simulasi' => $shu_simulasi,
+					'Persen Jasa Usaha' => $persen_jasa_usaha,
+					'Persen Jasa Modal' => $persen_jasa_modal
 				)
 			),
 			'customers' => $customer_data,
@@ -223,8 +231,8 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 
 	public function submit_button_action() {
 		$options_to_save = array();
-		foreach ($this->form_fields as $key) {
-			$options_to_save[$key] = $_POST['woocommerce_'.$this->id.'_'.$key];
+		foreach ($this->form_fields as $key => $value) {
+			$options_to_save[$key] = sanitize_text_field($_POST['woocommerce_'.$this->id.'_'.$key]);
 		}
 		update_option('woocommerce_'.$this->id.'_settings',$options_to_save);
 	}
@@ -241,11 +249,23 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
                 'description' => __( 'email untuk tujuan transaksi', 'woocommerce' ),
                 'default'     => __( '', 'woocommerce' )
             ),
-            'setting2' => array(
-                'title'       => __( 'Setting 2', 'woocommerce' ),
+            'shu_simulasi' => array(
+                'title'       => __( 'SHU Simulasi', 'woocommerce' ),
                 'type'        => 'text',
-                'description' => __( 'another setting', 'woocommerce' ),
-                'default'     => __( 'nothing here yet just a default value', 'woocommerce' )
+                'description' => __( 'nilai SHU untuk dihitung', 'woocommerce' ),
+                'default'     => __( '10000000', 'woocommerce' )
+			),
+			'persen_jasa_modal' => array(
+                'title'       => __( 'Persen Jasa Modal', 'woocommerce' ),
+                'type'        => 'text',
+                'description' => __( '(%)', 'woocommerce' ),
+                'default'     => __( '20', 'woocommerce' )
+			),
+			'persen_jasa_usaha' => array(
+                'title'       => __( 'Persen Jasa Usaha', 'woocommerce' ),
+                'type'        => 'text',
+                'description' => __( '(%)', 'woocommerce' ),
+                'default'     => __( '15', 'woocommerce' )
             ),
         );
 
