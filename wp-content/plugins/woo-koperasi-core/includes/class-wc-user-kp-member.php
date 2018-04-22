@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+
 class WC_User_KP_Member {
     private static $IS_MEMBER_KEY = 'is_a_koperasi_member';
     private static $SIMPANAN_KEY = 'simpanan_koperasi';
