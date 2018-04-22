@@ -3,13 +3,54 @@
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
-    private $koperasi_bank_email;
+	private $koperasi_bank_email;
 
     public function __construct() {
-        $this->id = 'koperasi_core';
+		$this->id = 'koperasi_core';
+		self::init_koperasi_data();
         add_action( 'admin_menu', array( $this, 'admin_menu' ), 1000 );
-    }
+	}
+	
+	private function init_koperasi_data() {
+		global $wpdb;
 
+		$table_name = $wpdb->prefix.'koperasi';
+		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+			//table not in database. Create new table
+			$charset_collate = $wpdb->get_charset_collate();
+
+			$sql = "CREATE TABLE $table_name (
+				id mediumint(9) NOT NULL AUTO_INCREMENT,
+				kp_key text NOT NULL,
+				kp_value text NOT NULL,
+				PRIMARY KEY (id)
+			) $charset_collate;";
+			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+			dbDelta( $sql );
+		}
+
+		$values_to_update = array(
+			array( 
+				'kp_key' => 'simpanan_dari_donasi', 
+				'kp_value' => 0
+			),
+			array( 
+				'kp_key' => 'dummy', 
+				'kp_value' => 100
+			),
+		);
+
+		foreach ($values_to_update as $index => $value) {
+			$kp_key = $value['kp_key'];
+			if ($wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE kp_key = \"$kp_key\"") == 0) {
+				$wpdb->insert( 
+					$table_name, 
+					$value
+				);
+			}
+		}
+	}
+	
     /**
 	 * Add menu items.
 	 */
