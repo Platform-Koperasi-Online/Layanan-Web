@@ -50,7 +50,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 			}
 		}
 	}
-	
+
     /**
 	 * Add menu items.
 	 */
@@ -74,18 +74,52 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	}
 	
 	public function get_data() {
+		$customer_data = self::get_filtered_customers_data();
+		$simpanan_dari_anggota = self::count_simpanan($customer_data);
+		$simpanan_dari_donasi = self::get_simpanan_donasi();
 		$data =  array(
 			'status' => array(
 				'Anggota Koperasi' => array(
-					'Jumlah anggota' => 5,
+					'Jumlah anggota' => self::count_anggota($customer_data),
 				),
 				'Simpanan Koperasi' => array(
-					'Saldo' => 5,
+					'Simpanan dari anggota' => $simpanan_dari_anggota,
+					'Simpanan dari donasi' => $simpanan_dari_donasi,
+					'Total' => $simpanan_dari_anggota + $simpanan_dari_donasi
 				)
 			),
-			'customers' => self::get_filtered_customers_data(),
+			'customers' => $customer_data,
 		);
 		return $data;
+	}
+
+	private function get_simpanan_donasi() {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix.'koperasi';
+		$kp_key = 'simpanan_dari_donasi';
+
+		return $wpdb->get_var("SELECT kp_value FROM $table_name WHERE kp_key = \"$kp_key\"");
+	}
+
+	private function count_anggota($customer_data) {
+		$count = 0;
+		foreach ($customer_data as $id => $data) {
+			if (WC_User_KP_Member::is_a_member($id)) {
+				$count++;
+			}
+		}
+		return $count;
+	}
+
+	private function count_simpanan($customer_data) {
+		$simpanan = 0;
+		foreach ($customer_data as $id => $data) {
+			if (WC_User_KP_Member::is_a_member($id)) {
+				$simpanan += WC_User_KP_Member::get_simpanan_member($id);
+			}
+		}
+		return $simpanan;
 	}
 
 	public function get_filtered_customers_data() {
