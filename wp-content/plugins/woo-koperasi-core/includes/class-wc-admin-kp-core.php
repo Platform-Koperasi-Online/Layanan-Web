@@ -32,17 +32,31 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	}
 	
 	public function get_data() {
+		$anggota = self::get_all_koperasi_member(); 
 		$data =  array(
 			'status' => array(
 				'Anggota Koperasi' => array(
 					'Jumlah anggota' => 5,
 				),
+				'List Anggota + simpanannya' => self::get_all_koperasi_member(),
 				'Simpanan Koperasi' => array(
 					'Saldo' => 5,
 				)
 			)
 		);
 		return $data;
+	}
+
+	public function get_all_koperasi_member() {
+		$users = get_users();
+		$anggota = array();
+		foreach ($users as $user) {
+			$user_id = $user->ID;
+			if (WC_User_KP_Member::is_a_member($user_id)) {
+				$anggota[$user->first_name . ' ' . $user->last_name] = WC_User_KP_Member::get_simpanan_member($user->ID);
+			}
+		}
+		return $anggota;
 	}
 
 	/**
@@ -92,7 +106,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 
 	public function submit_button_action() {
 		$options_to_save = array();
-		foreach ($this->form_fields as $key => $value) {
+		foreach ($this->form_fields as $key) {
 			$options_to_save[$key] = $_POST['woocommerce_'.$this->id.'_'.$key];
 		}
 		update_option('woocommerce_'.$this->id.'_settings',$options_to_save);

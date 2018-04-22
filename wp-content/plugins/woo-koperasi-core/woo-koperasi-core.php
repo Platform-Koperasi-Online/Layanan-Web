@@ -25,6 +25,7 @@ function koperasi_core() {
 function declare_koperasi_core_classes() {
     require_once('includes/class-wc-gateway-kp-debugger.php');
     require_once('includes/class-wc-gateway-kp-bank-bootstrapper.php');
+    require_once('includes/class-wc-user-kp-member.php');
 
     koperasi_core();
     require_once('includes/class-wc-gateway-kp-payment-gateway.php');
