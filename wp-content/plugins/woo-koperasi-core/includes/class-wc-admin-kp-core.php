@@ -27,7 +27,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		echo "<h1> Hello, Koperasi </h1>";
 		echo '<div class="wrap woocommerce">';
 		self::output_status($koperasi_data['status']);
-		self::output_dummy_anggota_page($koperasi_data['users']);
+		self::output_dummy_anggota_page($koperasi_data['customers']);
 		self::output_settings();
 		echo '</div>';
 	}
@@ -42,26 +42,28 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 					'Saldo' => 5,
 				)
 			),
-			'users' => self::get_filtered_users_data(),
+			'customers' => self::get_filtered_customers_data(),
 		);
 		return $data;
 	}
 
-	public function get_filtered_users_data() {
+	public function get_filtered_customers_data() {
 		$users = get_users();
-		$filtered_users = array();
+		$filtered_customers = array();
 		foreach ($users as $user) {
-			$user_id = $user->ID;
-			$filtered_users[$user_id] = self::filter_user_data($user);
+			$customer_id = $user->ID;
+			$filtered_customers[$customer_id] = self::filter_customer_data_from($user);
 		}
-		return $filtered_users;
+		return $filtered_customers;
 	}
 
-	public function filter_user_data($user) {
+	public function filter_customer_data_from($user) {
+		$customer = new WC_Customer($user->ID);
 		return array(
-			'name' => $user->first_name . ' ' . $user->last_name,
-			'is_a_koperasi_member' => WC_User_KP_Member::is_a_member($user->ID),
-			'simpanan_koperasi' => WC_User_KP_Member::get_simpanan_member($user->ID)
+			'name' => $customer->get_first_name() . ' ' . $customer->get_last_name(),
+			'is_a_koperasi_member' => WC_User_KP_Member::is_a_member($customer->get_id()),
+			'simpanan_koperasi' => WC_User_KP_Member::get_simpanan_member($customer->get_id()),
+			'total_spent' => $customer->get_total_spent()
 		);
 	}
 
@@ -91,25 +93,27 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		}
 	}
 
-	public function output_dummy_anggota_page($users) {
-		echo "<h2>Cek user</h2>";
+	public function output_dummy_anggota_page($customers) {
+		echo "<h2>Cek customer</h2>";
 		echo '
-			<table class="wc_status_table widefat" cellspacing="0" style="width:50%;table-layout:fixed">
-				<col style="width:10%" span="5"/>
+			<table class="wc_status_table widefat" cellspacing="0" style="width:70%;table-layout:fixed">
+				<col style="width:10%" span="7"/>
 				<thead>
 					<tr>
-						<th colspan="2"><h2> Nama User</h2></th>
+						<th colspan="2"><h2> Nama customer</h2></th>
 						<th colspan="1"><h2> Koperasi Member? </h2></th>
 						<th colspan="2"><h2> Simpanan </h2></th>
+						<th colspan="2"><h2> Total Pembelian </h2></th>
 					</tr>
 				</thead>
 				<tbody>';
-		foreach ($users as $user_id => $user_data) {
+		foreach ($customers as $customer_id => $customer_data) {
 			echo '
 			<tr>
-				<td colspan="2">'.$user_data['name'].' </td>
-				<td colspan="1">'.self::get_member_text($user_data['is_a_koperasi_member']).' </td>
-				<td colspan="2">'.$user_data['simpanan_koperasi'].' </td>
+				<td colspan="2">'.$customer_data['name'].' </td>
+				<td colspan="1">'.self::get_member_text($customer_data['is_a_koperasi_member']).' </td>
+				<td colspan="2">'.$customer_data['simpanan_koperasi'].' </td>
+				<td colspan="2">'.$customer_data['total_spent'].' </td>
 			</tr>';
 		}
 		echo '</tbody></table>';
