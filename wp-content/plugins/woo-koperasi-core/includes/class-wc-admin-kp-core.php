@@ -64,6 +64,10 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	 * Init the koperasi page.
 	 */
 	public function koperasi_core_page() {
+		// Check whether the button has been pressed AND also check the nonce
+		if (isset($_POST[$this->id.'_button']) && check_admin_referer($this->id.'_button_clicked')) {
+			self::submit_button_action();
+		}
 		$koperasi_data = self::get_data();
 		echo "<h1> Hello, Koperasi </h1>";
 		echo '<div class="wrap woocommerce">';
@@ -214,12 +218,6 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	 * Output the settings.
 	 */
 	public function output_settings() {
-		
-		// Check whether the button has been pressed AND also check the nonce
-		if (isset($_POST[$this->id.'_button']) && check_admin_referer($this->id.'_button_clicked')) {
-			self::submit_button_action();
-		}
-
 		echo "<h2>Settings</h2>";
 		echo '<form method="post" id="mainform" action="" enctype="multipart/form-data">';
 		self::admin_options();
