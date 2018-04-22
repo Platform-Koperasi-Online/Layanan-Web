@@ -27,36 +27,42 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		echo "<h1> Hello, Koperasi </h1>";
 		echo '<div class="wrap woocommerce">';
 		self::output_status($koperasi_data['status']);
+		self::output_dummy_anggota_page($koperasi_data['users']);
 		self::output_settings();
 		echo '</div>';
 	}
 	
 	public function get_data() {
-		$anggota = self::get_all_koperasi_member(); 
 		$data =  array(
 			'status' => array(
 				'Anggota Koperasi' => array(
 					'Jumlah anggota' => 5,
 				),
-				'List Anggota + simpanannya' => self::get_all_koperasi_member(),
 				'Simpanan Koperasi' => array(
 					'Saldo' => 5,
 				)
-			)
+			),
+			'users' => self::get_filtered_users_data(),
 		);
 		return $data;
 	}
 
-	public function get_all_koperasi_member() {
+	public function get_filtered_users_data() {
 		$users = get_users();
-		$anggota = array();
+		$filtered_users = array();
 		foreach ($users as $user) {
 			$user_id = $user->ID;
-			if (WC_User_KP_Member::is_a_member($user_id)) {
-				$anggota[$user->first_name . ' ' . $user->last_name] = WC_User_KP_Member::get_simpanan_member($user->ID);
-			}
+			$filtered_users[$user_id] = self::filter_user_data($user);
 		}
-		return $anggota;
+		return $filtered_users;
+	}
+
+	public function filter_user_data($user) {
+		return array(
+			'name' => $user->first_name . ' ' . $user->last_name,
+			'is_a_koperasi_member' => WC_User_KP_Member::is_a_member($user->ID),
+			'simpanan_koperasi' => WC_User_KP_Member::get_simpanan_member($user->ID)
+		);
 	}
 
 	/**
@@ -82,6 +88,38 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 				';
 			}
 			echo '</tbody></table>';
+		}
+	}
+
+	public function output_dummy_anggota_page($users) {
+		echo "<h2>Cek user</h2>";
+		echo '
+			<table class="wc_status_table widefat" cellspacing="0" style="width:50%;table-layout:fixed">
+				<col style="width:10%" span="5"/>
+				<thead>
+					<tr>
+						<th colspan="2"><h2> Nama User</h2></th>
+						<th colspan="1"><h2> Koperasi Member? </h2></th>
+						<th colspan="2"><h2> Simpanan </h2></th>
+					</tr>
+				</thead>
+				<tbody>';
+		foreach ($users as $user_id => $user_data) {
+			echo '
+			<tr>
+				<td colspan="2">'.$user_data['name'].' </td>
+				<td colspan="1">'.self::get_member_text($user_data['is_a_koperasi_member']).' </td>
+				<td colspan="2">'.$user_data['simpanan_koperasi'].' </td>
+			</tr>';
+		}
+		echo '</tbody></table>';
+	}
+
+	private function get_member_text($is_member) {
+		if ($is_member) {
+			return 'yes';
+		} else {
+			return 'no';
 		}
 	}
 
