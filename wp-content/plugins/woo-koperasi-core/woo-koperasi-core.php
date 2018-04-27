@@ -29,6 +29,8 @@ function declare_koperasi_core_classes() {
 
     koperasi_core();
     require_once('includes/class-wc-gateway-kp-payment-gateway.php');
+    require_once('includes/api/class-wc-api-kp-login-controller.php');
+    register_rest_routes();
 }
 
 add_action( 'plugins_loaded', 'declare_koperasi_core_classes', 1000);
@@ -39,3 +41,15 @@ function add_gateway_class( $methods ) {
 }
 
 add_filter( 'woocommerce_payment_gateways', 'add_gateway_class' );
+
+function register_rest_routes() {
+
+	$controllers = array(
+		'WC_API_KP_Login_Controller'
+	);
+
+	foreach ( $controllers as $controller ) {
+		(new $controller())->register_routes();
+	}
+}
+
