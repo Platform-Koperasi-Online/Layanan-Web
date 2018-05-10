@@ -10,6 +10,7 @@ class WC_KP_Shortcodes {
 	public static function init() {
 		$shortcodes = array(
 			'simpanan'                    => __CLASS__ . '::simpanan',
+			'pinjaman'                    => __CLASS__ . '::pinjaman',
 		);
 
 		foreach ( $shortcodes as $shortcode => $function ) {
@@ -21,5 +22,11 @@ class WC_KP_Shortcodes {
         $user = wp_get_current_user();
         $simpanan= new WC_KP_Simpanan($user);
         $simpanan->output_page();
+	}
+	
+	public static function pinjaman() {
+        $user = wp_get_current_user();
+        $pinjaman= new WC_KP_Pinjaman($user);
+        $pinjaman->output_page();
     }
 }
