@@ -4,9 +4,13 @@ class WC_KP_Simpanan{
     private $id;
     private $user;
 
-    public function __construct($user) {
+    public function __construct($user = null) {
         $this->id = 'koperasi_simpanan';
         $this->user = $user;
+    }
+
+    public static function admin_page() {
+        echo '<h1>Hello, Admin Simpanan<h1>';
     }
 
     public function output_page() {

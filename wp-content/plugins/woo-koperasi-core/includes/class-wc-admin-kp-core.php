@@ -21,12 +21,12 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 			$charset_collate = $wpdb->get_charset_collate();
 
 			$sql = "CREATE TABLE $table_name (
-				id mediumint(9) NOT NULL AUTO_INCREMENT,
+				id_simpanan mediumint(9) NOT NULL AUTO_INCREMENT,
 				user_id INT NOT NULL,
 				tipe_simpanan text NOT NULL,
 				nilai_simpanan text NOT NULL,
 				waktu DATETIME NOT NULL,
-				PRIMARY KEY (id)
+				PRIMARY KEY (id_simpanan)
 			) $charset_collate;";
 			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 			dbDelta( $sql );
@@ -38,8 +38,12 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	 */
 	public function admin_menu() {
 		// Load the settings.
-        $this->init_form_fields();
-		add_submenu_page( 'woocommerce', __( 'Koperasi', 'woocommerce' ), __( 'Koperasi', 'woocommerce' ), 'manage_woocommerce', 'koperasi_core', array( $this, 'koperasi_core_page' ) );
+		$this->init_form_fields();
+		//add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce', null, null, '55.5' );
+		add_menu_page( __( 'Koperasi', 'woocommerce' ), __( 'WooKoperasi', 'woocommerce' ), 'manage_woocommerce','koperasi_core', null, null, '55.4' );
+		add_submenu_page( 'koperasi_core', __( 'Koperasi', 'woocommerce' ), __( 'Koperasi', 'woocommerce' ), 'manage_woocommerce', 'koperasi_core', array( $this, 'koperasi_core_page' ) );
+		add_submenu_page( 'koperasi_core', __( 'Simpanan', 'woocommerce' ), __( 'Simpanan', 'woocommerce' ), 'manage_woocommerce', 'koperasi_core_simpanan', array( new WC_KP_Simpanan(), 'admin_page' ) );
+		add_submenu_page( 'koperasi_core', __( 'Pinjaman', 'woocommerce' ), __( 'Pinjaman', 'woocommerce' ), 'manage_woocommerce', 'koperasi_core_pinjaman', array( new WC_KP_Pinjaman(), 'admin_page' ) );
     }
     
     /**
@@ -51,7 +55,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 			self::submit_button_action();
 		}
 		$koperasi_data = self::get_data();
-		echo "<h1> Hello, Koperasi </h1>";
+		echo "<h1> Hello, Admin Koperasi </h1>";
 		echo '<div class="wrap woocommerce">';
 		self::output_status($koperasi_data['status']);
 		self::output_dummy_anggota_page($koperasi_data['customers'],$koperasi_data['shu_data']);
