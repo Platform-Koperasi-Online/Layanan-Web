@@ -27,12 +27,10 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
     }
 
     function declare_koperasi_core_classes() {
-        require_once('includes/class-wc-gateway-kp-debugger.php');
-        require_once('includes/class-wc-gateway-kp-bank-bootstrapper.php');
-        require_once('includes/class-wc-user-kp-member.php');
-        require_once('includes/class-wc-gateway-kp-payment-gateway.php');
-        require_once('includes/class-wc-kp-simpan.php');
-        require_once('includes/class-wc-kp-shortcodes.php');
+        foreach (glob(dirname(__FILE__).'/includes/*.php') as $filename)
+        {
+            require_once($filename);
+        }
 
         koperasi_core();
     }
