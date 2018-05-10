@@ -218,7 +218,11 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	}
 
 	private function calculate_yang_didapat($basis, $shu_simulasi, $persen, $nilai_yang_dikalkulasi) {
-		return ((($persen/100) * $shu_simulasi)/$basis) * $nilai_yang_dikalkulasi ;
+		if ($basis != 0){
+			return ((($persen/100) * $shu_simulasi)/$basis) * $nilai_yang_dikalkulasi ;
+		} else {
+			return 0;
+		}
 	}
 
 	private function get_member_text($is_member) {

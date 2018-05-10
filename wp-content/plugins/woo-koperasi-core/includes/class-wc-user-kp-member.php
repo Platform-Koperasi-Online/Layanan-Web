@@ -4,8 +4,6 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 class WC_User_KP_Member {
     private static $IS_MEMBER_KEY = 'is_a_koperasi_member';
-    private static $SIMPANAN_POKOK_KEY = 'simpanan_koperasi';
-    private static $SIMPANAN_SUKARELA_KEY = 'simpanan_sukarela_koperasi';
 
 
     public static function is_a_member($user_id) {
@@ -21,7 +19,7 @@ class WC_User_KP_Member {
     }
 
     public static function get_simpanan_member($user_id, $type = 'pokok') {
-        if (self::is_type_correct($type)) {
+        if (self::is_simpanan_type_correct($type)) {
             global $wpdb;
             $table_name = $wpdb->prefix.'kp_simpanan';
             $sum = $wpdb->get_var("SELECT SUM(nilai_simpanan) FROM $table_name WHERE user_id = $user_id AND tipe_simpanan = \"$type\"");
@@ -34,7 +32,7 @@ class WC_User_KP_Member {
     }
 
     public static function add_simpanan_member($user_id, $value, $type = 'pokok') {
-        if (self::is_type_correct($type)) {
+        if (self::is_simpanan_type_correct($type)) {
             $value_to_insert = array( 
                 'user_id' => $user_id,
                 'tipe_simpanan' => $type, 
@@ -51,7 +49,7 @@ class WC_User_KP_Member {
         }
     }
 
-    public static function is_type_correct($type) {
+    public static function is_simpanan_type_correct($type) {
         return $type == 'wajib' || $type == 'pokok' || $type == 'sukarela';
     }
 }
