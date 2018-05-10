@@ -18,6 +18,8 @@ class WC_KP_Shortcodes {
     }
 
     public static function simpan() {
-        echo 'Hello Simpan';
+        $user = wp_get_current_user();
+        $simpan = new WC_KP_Simpan($user);
+        $simpan->output_page();
     }
 }
