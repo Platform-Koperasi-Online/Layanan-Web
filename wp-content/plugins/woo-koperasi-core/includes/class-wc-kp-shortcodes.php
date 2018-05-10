@@ -9,7 +9,7 @@ class WC_KP_Shortcodes {
 	 */
 	public static function init() {
 		$shortcodes = array(
-			'simpan'                    => __CLASS__ . '::simpan',
+			'simpanan'                    => __CLASS__ . '::simpanan',
 		);
 
 		foreach ( $shortcodes as $shortcode => $function ) {
@@ -17,9 +17,9 @@ class WC_KP_Shortcodes {
 		}
     }
 
-    public static function simpan() {
+    public static function simpanan() {
         $user = wp_get_current_user();
-        $simpan = new WC_KP_Simpan($user);
-        $simpan->output_page();
+        $simpanan= new WC_KP_Simpanan($user);
+        $simpanan->output_page();
     }
 }

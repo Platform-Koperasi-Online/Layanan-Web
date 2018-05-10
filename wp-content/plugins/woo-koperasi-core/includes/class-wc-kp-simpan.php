@@ -1,11 +1,11 @@
 <?php
 
-class WC_KP_Simpan {
+class WC_KP_Simpanan{
     private $id;
     private $user;
 
     public function __construct($user) {
-        $this->id = 'koperasi_simpan';
+        $this->id = 'koperasi_simpanan';
         $this->user = $user;
     }
 
@@ -21,39 +21,71 @@ class WC_KP_Simpan {
 		self::simpan_forms();
 		wp_nonce_field($this->id.'_button_clicked');
         echo '<input type="hidden" value="true" name="'.$this->id.'_button" />';
-		echo '<input type="submit" name="'.$this->id.'_button" value="Simpan!">';
+		echo '<input type="submit" name="'.$this->id.'_button" value="Simpanan">';
 		echo '</form>';
     }
 
     function simpan_forms() {
         echo '<div>';
         $form_input = self::get_form_fields();
-        foreach ($form_input as $form_id => $label) {
+        foreach ($form_input as $form_id => $form) {
             $name = 'woocommerce_'.$this->id.'_'.$form_id;
-            echo'<p>
-                <label for="'.$name.'">'.$label.'</label>
-                <input class="input-text regular-input " name="'.$name.'" id="'.$name.'" style="" value="" placeholder="" type="text">
-                </p>';
+            $type = $form['type'];
+            if ( method_exists( $this, 'generate_' . $type . '_form_html' ) ) {
+				$this->{'generate_' . $type . '_form_html'}( $name, $form );
+			} else {
+				$this->generate_text_form_html( $name, $form );
+            }
         }
         echo '</div>';
     }
 
     function get_form_fields() {
         return array(
-            'test_1' => 'Test 1',
-            'test_2' => 'Test 2'
+            'tipe_simpanan' => array(
+                'type' => 'radio',
+                'label' => 'Tipe simpanan',
+                'values' => array(
+                    'pokok' => 'Pokok',
+                    'sukarela' => 'Sukarela'
+                )
+            ), 
+            'nilai_simpanan' => array(
+                'type' => 'text',
+                'label' => 'Jumlah yang ingin disimpan'
+            )
         );
     }
 
     function submit_button_action() {
-        echo '<h1>YO</h1>';
         echo '<p>the inputs are :</p>';
         $form_input = self::get_form_fields();
-        foreach ($form_input as $form_id => $label) {
+        foreach ($form_input as $form_id => $form) {
             $name = 'woocommerce_'.$this->id.'_'.$form_id;
+            $label = $form['label'];
             if (isset($_POST[$name])) {
                 echo '<p> '.$label.' : '.$_POST[$name].'</p>';
             }
         }
+    }
+
+    function generate_text_form_html( $name, $form ) {
+        $label = $form['label'];
+        echo'<p>
+            <label for="'.$name.'">'.$label.'</label>
+            <input class="input-text regular-input " name="'.$name.'" id="'.$name.'" style="" value="" placeholder="" type="text">
+            </p>';
+    }
+
+    function generate_radio_form_html( $name, $form ) {
+        $label = $form['label'];
+        $values = $form['values'];
+        echo'<p>
+            <label for="'.$name.'">'.$label.'</label>';
+        foreach ($values as $value => $value_label ) {
+            echo '<input class="input-text regular-input " name="'.$name.'" id="'.$name.'" style="" value="'.$value.'" placeholder="" type="radio">';
+            echo $value_label;
+        }
+        echo '</p>';
     }
 }
