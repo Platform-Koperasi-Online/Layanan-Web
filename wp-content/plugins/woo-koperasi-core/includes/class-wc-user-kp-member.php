@@ -26,4 +26,9 @@ class WC_User_KP_Member {
             return $value;
         }
     }
+
+    public static function add_simpanan_member($user_id, $value) {
+        $prev_value = get_user_meta($user_id, self::$SIMPANAN_KEY,true);
+        update_user_meta($user_id,self::$SIMPANAN_KEY,$prev_value + $value);
+    }
 }

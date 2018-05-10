@@ -58,10 +58,15 @@ class WC_KP_Simpanan{
     }
 
     function submit_button_action() {
-        echo '<p>the inputs are :</p>';
+        $user = $this->user;
+        $nilai_simpanan_lama = WC_User_KP_Member::get_simpanan_member($user->ID);
+        $nilai_simpanan_tambah = $_POST[$this->get_form_name('nilai_simpanan')];
+        WC_User_KP_Member::add_simpanan_member($user->ID,$nilai_simpanan_tambah);
+        $nilai_simpanan_baru = WC_User_KP_Member::get_simpanan_member($user->ID);
+        echo '<p>lama : <b>' . $nilai_simpanan_lama . '</b> menjadi baru : <b>'.$nilai_simpanan_baru.'</b>';
         $form_input = self::get_form_fields();
         foreach ($form_input as $form_id => $form) {
-            $name = 'woocommerce_'.$this->id.'_'.$form_id;
+            $name = $this->get_form_name( $form_id );
             $label = $form['label'];
             if (isset($_POST[$name])) {
                 echo '<p> '.$label.' : '.$_POST[$name].'</p>';
@@ -87,5 +92,9 @@ class WC_KP_Simpanan{
             echo $value_label;
         }
         echo '</p>';
+    }
+
+    function get_form_name($form_id) {
+        return 'woocommerce_'.$this->id.'_'.$form_id;
     }
 }
