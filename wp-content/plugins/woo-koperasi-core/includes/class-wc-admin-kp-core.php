@@ -81,7 +81,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	public function get_data() {
 		$customer_data = self::get_filtered_customers_data();
 		$simpanan_dari_anggota = self::count_simpanan($customer_data);
-		$simpanan_dari_donasi = self::get_simpanan_donasi();
+		$simpanan_dari_donasi = self::get_simpanan_donasi($customer_data);
 		$shu_simulasi = $this->get_option('shu_simulasi');
 		$total_penjualan_simulasi = $this->get_option('total_penjualan_simulasi');
 		$persen_jasa_modal = $this->get_option('persen_jasa_modal');
@@ -115,13 +115,14 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		return $data;
 	}
 
-	private function get_simpanan_donasi() {
-		global $wpdb;
-
-		$table_name = $wpdb->prefix.'koperasi';
-		$kp_key = 'simpanan_dari_donasi';
-
-		return $wpdb->get_var("SELECT kp_value FROM $table_name WHERE kp_key = \"$kp_key\"");
+	private function get_simpanan_donasi($customer_data) {
+		$simpanan = 0;
+		foreach ($customer_data as $id => $data) {
+			if (WC_User_KP_Member::is_a_member($id)) {
+				$simpanan += WC_User_KP_Member::get_simpanan_member($id,'sukarela');
+			}
+		}
+		return $simpanan;
 	}
 
 	private function count_anggota($customer_data) {
