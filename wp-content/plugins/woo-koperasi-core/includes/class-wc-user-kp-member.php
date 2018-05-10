@@ -7,6 +7,7 @@ class WC_User_KP_Member {
     private static $SIMPANAN_POKOK_KEY = 'simpanan_koperasi';
     private static $SIMPANAN_SUKARELA_KEY = 'simpanan_sukarela_koperasi';
 
+
     public static function is_a_member($user_id) {
         return get_user_meta($user_id,self::$IS_MEMBER_KEY,true) == 'true';
     }
@@ -20,26 +21,37 @@ class WC_User_KP_Member {
     }
 
     public static function get_simpanan_member($user_id, $type = 'pokok') {
-        if ($type == 'sukarela') {
-            $key = self::$SIMPANAN_SUKARELA_KEY;
-        } else {
-            $key = self::$SIMPANAN_POKOK_KEY;
-        }
-        $value = get_user_meta($user_id, $key, true);
-        if ($value == '') {
-            return 0;
-        } else {
-            return $value;
+        if (self::is_type_correct($type)) {
+            global $wpdb;
+            $table_name = $wpdb->prefix.'kp_simpanan';
+            $sum = $wpdb->get_var("SELECT SUM(nilai_simpanan) FROM $table_name WHERE user_id = $user_id AND tipe_simpanan = \"$type\"");
+            if (is_numeric($sum)) {
+                return $sum; 
+            } else {
+                return 0;
+            }
         }
     }
 
     public static function add_simpanan_member($user_id, $value, $type = 'pokok') {
-        if ($type == 'sukarela') {
-            $key = self::$SIMPANAN_SUKARELA_KEY;
-        } else {
-            $key = self::$SIMPANAN_POKOK_KEY;
+        if (self::is_type_correct($type)) {
+            $value_to_insert = array( 
+                'user_id' => $user_id,
+                'tipe_simpanan' => $type, 
+                'nilai_simpanan' => $value,
+                'waktu' => date("Y-m-d H:i:s")
+            );
+
+            global $wpdb;
+            $table_name = $wpdb->prefix.'kp_simpanan';
+            $wpdb->insert( 
+                $table_name, 
+                $value_to_insert
+            );
         }
-        $prev_value = get_user_meta($user_id, $key, true);
-        update_user_meta($user_id, $key, $prev_value + $value);
+    }
+
+    public static function is_type_correct($type) {
+        return $type == 'wajib' || $type == 'pokok' || $type == 'sukarela';
     }
 }

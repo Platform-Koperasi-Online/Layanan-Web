@@ -15,40 +15,21 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	private function init_koperasi_data() {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix.'koperasi';
+		$table_name = $wpdb->prefix.'kp_simpanan';
 		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
 			//table not in database. Create new table
 			$charset_collate = $wpdb->get_charset_collate();
 
 			$sql = "CREATE TABLE $table_name (
 				id mediumint(9) NOT NULL AUTO_INCREMENT,
-				kp_key text NOT NULL,
-				kp_value text NOT NULL,
+				user_id INT NOT NULL,
+				tipe_simpanan text NOT NULL,
+				nilai_simpanan text NOT NULL,
+				waktu DATETIME NOT NULL,
 				PRIMARY KEY (id)
 			) $charset_collate;";
 			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 			dbDelta( $sql );
-		}
-
-		$values_to_update = array(
-			array( 
-				'kp_key' => 'simpanan_dari_donasi', 
-				'kp_value' => 0
-			),
-			array( 
-				'kp_key' => 'dummy', 
-				'kp_value' => 100
-			),
-		);
-
-		foreach ($values_to_update as $index => $value) {
-			$kp_key = $value['kp_key'];
-			if ($wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE kp_key = \"$kp_key\"") == 0) {
-				$wpdb->insert( 
-					$table_name, 
-					$value
-				);
-			}
 		}
 	}
 
