@@ -30,6 +30,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
         require_once('includes/class-wc-gateway-kp-debugger.php');
         require_once('includes/class-wc-gateway-kp-bank-bootstrapper.php');
         require_once('includes/class-wc-user-kp-member.php');
+        require_once('includes/class-wc-kp-shortcodes.php');
 
         koperasi_core();
         require_once('includes/class-wc-gateway-kp-payment-gateway.php');

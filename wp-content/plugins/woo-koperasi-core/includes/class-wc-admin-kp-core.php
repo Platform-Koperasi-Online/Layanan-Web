@@ -8,7 +8,8 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
     public function __construct() {
 		$this->id = 'koperasi_core';
 		self::init_koperasi_data();
-        add_action( 'admin_menu', array( $this, 'admin_menu' ), 1000 );
+		add_action( 'admin_menu', array( $this, 'admin_menu' ), 1000 );
+		add_action( 'init', array( 'WC_KP_Shortcodes', 'init' ) );
 	}
 	
 	private function init_koperasi_data() {
