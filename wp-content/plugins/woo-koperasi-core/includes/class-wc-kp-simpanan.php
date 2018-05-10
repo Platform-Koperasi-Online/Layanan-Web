@@ -1,8 +1,6 @@
 <?php
 
-class WC_KP_Simpanan{
-    private $id;
-    private $user;
+class WC_KP_Simpanan extends WC_KP_Page {
 
     public function __construct($user = null) {
         $this->id = 'koperasi_simpanan';
@@ -30,12 +28,12 @@ class WC_KP_Simpanan{
         echo '<h3>Status Simpanan</h3>';
         echo '<p>Simpanan pokok : ';
         echo '<b>';
-        echo WC_User_KP_Member::get_simpanan_member($this->user->ID);
+        echo self::get_simpanan_member($this->user->ID);
         echo '</b>';
         echo '</p>';
         echo '<p>Simpanan sukarela : ';
         echo '<b>';
-        echo WC_User_KP_Member::get_simpanan_member($this->user->ID,'sukarela');
+        echo self::get_simpanan_member($this->user->ID,'sukarela');
         echo '</b>';
         echo '</p>';
         echo '</div>';
@@ -84,38 +82,42 @@ class WC_KP_Simpanan{
         $user = $this->user;
         $nilai_simpanan = $_POST[$this->get_form_name('nilai_simpanan')];
         $tipe_simpanan = $_POST[$this->get_form_name('tipe_simpanan')];
-        WC_User_KP_Member::add_simpanan_member($user->ID,$nilai_simpanan,$tipe_simpanan);
+        self::add_simpanan_member($user->ID,$nilai_simpanan,$tipe_simpanan);
         $form_input = self::get_form_fields();
-        foreach ($form_input as $form_id => $form) {
-            $name = $this->get_form_name( $form_id );
-            $label = $form['label'];
+    }
+
+    public static function get_simpanan_member($user_id, $type = 'pokok') {
+        if (self::is_simpanan_type_correct($type)) {
+            global $wpdb;
+            $table_name = $wpdb->prefix.'kp_simpanan';
+            $sum = $wpdb->get_var("SELECT SUM(nilai_simpanan) FROM $table_name WHERE user_id = $user_id AND tipe_simpanan = \"$type\"");
+            if (is_numeric($sum)) {
+                return $sum; 
+            } else {
+                return 0;
+            }
         }
     }
 
-    function generate_text_form_html( $name, $form ) {
-        $label = $form['label'];
-        $default_value = $form['default'];
-        echo'<p>
-            <label for="'.$name.'">'.$label.'</label>
-            <input class="input-text regular-input " name="'.$name.'" id="'.$name.'" style="" value="'.$default_value.'" placeholder="" type="text">
-            </p>';
-    }
+    public static function add_simpanan_member($user_id, $value, $type = 'pokok') {
+        if (self::is_simpanan_type_correct($type)) {
+            $value_to_insert = array( 
+                'user_id' => $user_id,
+                'tipe_simpanan' => $type, 
+                'nilai_simpanan' => $value,
+                'waktu' => date("Y-m-d H:i:s")
+            );
 
-    function generate_radio_form_html( $name, $form ) {
-        $label = $form['label'];
-        $values = $form['values'];
-        echo'<div>
-            <label for="'.$name.'">'.$label.'</label>';
-        foreach ($values as $value => $value_label ) {
-            echo'<p>';
-            echo '<input class="input-text regular-input " name="'.$name.'" id="'.$name.'" style="" value="'.$value.'" placeholder="" type="radio">';
-            echo $value_label;
-            echo '</p>';
+            global $wpdb;
+            $table_name = $wpdb->prefix.'kp_simpanan';
+            $wpdb->insert( 
+                $table_name, 
+                $value_to_insert
+            );
         }
-        echo '</div>';
     }
 
-    function get_form_name($form_id) {
-        return 'woocommerce_'.$this->id.'_'.$form_id;
+    public static function is_simpanan_type_correct($type) {
+        return $type == 'wajib' || $type == 'pokok' || $type == 'sukarela';
     }
 }

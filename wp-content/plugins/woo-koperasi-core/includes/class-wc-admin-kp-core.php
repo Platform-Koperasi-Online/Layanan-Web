@@ -104,7 +104,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		$simpanan = 0;
 		foreach ($customer_data as $id => $data) {
 			if (WC_User_KP_Member::is_a_member($id)) {
-				$simpanan += WC_User_KP_Member::get_simpanan_member($id,'sukarela');
+				$simpanan += WC_KP_Simpanan::get_simpanan_member($id,'sukarela');
 			}
 		}
 		return $simpanan;
@@ -124,7 +124,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		$simpanan = 0;
 		foreach ($customer_data as $id => $data) {
 			if (WC_User_KP_Member::is_a_member($id)) {
-				$simpanan += WC_User_KP_Member::get_simpanan_member($id);
+				$simpanan += WC_KP_Simpanan::get_simpanan_member($id);
 			}
 		}
 		return $simpanan;
@@ -145,7 +145,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		return array(
 			'name' => $customer->get_first_name() . ' ' . $customer->get_last_name(),
 			'is_a_koperasi_member' => WC_User_KP_Member::is_a_member($customer->get_id()),
-			'simpanan_koperasi' => WC_User_KP_Member::get_simpanan_member($customer->get_id()),
+			'simpanan_koperasi' => WC_KP_Simpanan::get_simpanan_member($customer->get_id()),
 			'total_spent' => $customer->get_total_spent()
 		);
 	}
