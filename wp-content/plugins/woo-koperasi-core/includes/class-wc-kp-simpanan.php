@@ -83,7 +83,6 @@ class WC_KP_Simpanan extends WC_KP_Page {
         $nilai_simpanan = $_POST[$this->get_form_name('nilai_simpanan')];
         $tipe_simpanan = $_POST[$this->get_form_name('tipe_simpanan')];
         self::add_simpanan_member($user->ID,$nilai_simpanan,$tipe_simpanan);
-        $form_input = self::get_form_fields();
     }
 
     public static function get_simpanan_member($user_id, $type = 'pokok') {

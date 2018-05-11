@@ -61,8 +61,20 @@ class WC_KP_Pinjaman extends WC_KP_Page {
                 'type' => 'text',
                 'label' => 'Jumlah yang ingin dipinjam',
                 'default' => 0
-            )
+            ),
+            'batas_akhir' => array(
+                'type' => 'date',
+                'label' => 'Batas Akhir Angsuran',
+                'default' => 0
+            ),
         );
+    }
+    
+    function submit_button_action() {
+        $user = $this->user;
+        $nilai_pinjaman = $_POST[self::get_form_name('nilai_pinjaman')];
+        $batas_akhir = date('Y-m-d',strtotime($_POST[self::get_form_name('batas_akhir')]));
+        self::add_pinjaman_member($user->ID, $nilai_pinjaman, $batas_akhir);
     }
 
     public static function get_pinjaman_limit($user_id, $return_label = false) {
@@ -80,17 +92,22 @@ class WC_KP_Pinjaman extends WC_KP_Page {
         }
     }
 
-    function submit_button_action() {
-        $user = $this->user;
-        $form_input = self::get_form_fields();
-        foreach ($form_input as $form_id => $form) {
-            $name = $this->get_form_name( $form_id );
-            $label = $form['label'];
-            echo $label.' : '.$_POST[$name];
-        }
-    }
-
     public static function set_pinjaman_capability($user_id, $capability) {
         return update_user_meta( $user_id, self::$PINJAMAN_LIMIT, true);
+    }
+
+    public static function add_pinjaman_member($user_id, $nilai_pinjaman, $batas_akhir) {
+        $value_to_insert = array(
+            'user_id' => $user_id,
+            'nilai_pinjaman' => $nilai_pinjaman, 
+            'batas_akhir' => $batas_akhir
+        );
+
+        global $wpdb;
+        $table_name = $wpdb->prefix.'kp_pinjaman';
+        $wpdb->insert( 
+            $table_name, 
+            $value_to_insert
+        );
     }
 }

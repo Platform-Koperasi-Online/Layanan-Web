@@ -27,6 +27,15 @@ class WC_KP_Page {
         echo '</div>';
     }
 
+    protected function generate_date_form_html( $name, $form) {
+        $label = $form['label'];
+        $default_value = $form['default'];
+        echo'<p>
+            <label for="'.$name.'">'.$label.'</label>
+            <input class="input-text regular-input " name="'.$name.'" id="'.$name.'" style="" value="'.$default_value.'" placeholder="" type="date">
+            </p>';
+    }
+
     protected function get_form_name($form_id) {
         return 'woocommerce_'.$this->id.'_'.$form_id;
     }

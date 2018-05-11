@@ -22,11 +22,27 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 
 			$sql = "CREATE TABLE $table_name (
 				id_simpanan mediumint(9) NOT NULL AUTO_INCREMENT,
-				user_id INT NOT NULL,
+				user_id int NOT NULL,
 				tipe_simpanan text NOT NULL,
-				nilai_simpanan text NOT NULL,
-				waktu DATETIME NOT NULL,
+				nilai_simpanan numeric(19,4) NOT NULL,
+				waktu datetime NOT NULL,
 				PRIMARY KEY (id_simpanan)
+			) $charset_collate;";
+			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+			dbDelta( $sql );
+		}
+
+		$table_name = $wpdb->prefix.'kp_pinjaman';
+		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+			//table not in database. Create new table
+			$charset_collate = $wpdb->get_charset_collate();
+
+			$sql = "CREATE TABLE $table_name (
+				id_pinjaman mediumint(9) NOT NULL AUTO_INCREMENT,
+				user_id int NOT NULL,
+				nilai_pinjaman numeric(19,4) NOT NULL,
+				batas_akhir date NOT NULL,
+				PRIMARY KEY (id_pinjaman)
 			) $charset_collate;";
 			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 			dbDelta( $sql );
