@@ -31,6 +31,19 @@ class WC_KP_Pinjaman extends WC_KP_Page {
         echo '<b>';
         echo self::get_pinjaman_limit($this->user->ID, true);
         echo '</b>';
+        echo '</p>';
+        echo '<h3>Semua Pinjaman</h3>';
+        $all_pinjaman = self::get_all_pinjaman($this->user->ID);
+        if ($all_pinjaman != null) {
+            foreach ($all_pinjaman as $key => $pinjaman) {
+                echo '<p>';
+                echo $key.' -> ';
+                echo '<pre>';
+                print_r($pinjaman);
+                echo '</pre>';
+                echo '</p>';
+            }
+        }
         echo '</div>';
     }
 
@@ -96,11 +109,12 @@ class WC_KP_Pinjaman extends WC_KP_Page {
         return update_user_meta( $user_id, self::$PINJAMAN_LIMIT, true);
     }
 
-    public static function add_pinjaman_member($user_id, $nilai_pinjaman, $batas_akhir) {
+    public static function add_pinjaman_member($user_id, $nilai_pinjaman, $batas_akhir, $status_pinjaman = 'tunggu_approval') {
         $value_to_insert = array(
             'user_id' => $user_id,
             'nilai_pinjaman' => $nilai_pinjaman, 
-            'batas_akhir' => $batas_akhir
+            'batas_akhir' => $batas_akhir,
+            'status_pinjaman' => $status_pinjaman
         );
 
         global $wpdb;
@@ -109,5 +123,11 @@ class WC_KP_Pinjaman extends WC_KP_Page {
             $table_name, 
             $value_to_insert
         );
+    }
+
+    public static function get_all_pinjaman($user_id) {
+        global $wpdb;
+        $table_name = $wpdb->prefix.'kp_pinjaman';
+        return $wpdb->get_results("SELECT id_pinjaman ,nilai_pinjaman, batas_akhir, status_pinjaman  FROM $table_name WHERE user_id = $user_id", ARRAY_A );
     }
 }

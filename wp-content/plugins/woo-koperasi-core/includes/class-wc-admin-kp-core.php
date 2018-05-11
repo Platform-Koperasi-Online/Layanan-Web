@@ -42,6 +42,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 				user_id int NOT NULL,
 				nilai_pinjaman numeric(19,4) NOT NULL,
 				batas_akhir date NOT NULL,
+				status_pinjaman text NOT NULL,
 				PRIMARY KEY (id_pinjaman)
 			) $charset_collate;";
 			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
