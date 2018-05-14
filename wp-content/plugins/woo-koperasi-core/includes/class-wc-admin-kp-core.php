@@ -48,6 +48,21 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 			dbDelta( $sql );
 		}
+
+		$table_name = $wpdb->prefix.'kp_periode';
+		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
+			//table not in database. Create new table
+			$charset_collate = $wpdb->get_charset_collate();
+
+			$sql = "CREATE TABLE $table_name (
+				id_periode mediumint(9) NOT NULL AUTO_INCREMENT,
+				awal_periode datetime NOT NULL,
+				akhir_periode datetime,
+				PRIMARY KEY (id_periode)
+			) $charset_collate;";
+			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+			dbDelta( $sql );
+		}
 	}
 
     /**
@@ -71,10 +86,18 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		if (isset($_POST[$this->id.'_button']) && check_admin_referer($this->id.'_button_clicked')) {
 			self::submit_button_action();
 		}
+		if (isset($_POST[$this->id.'_periode_button']) && check_admin_referer($this->id.'_periode_button_clicked')) {
+			if (self::is_in_a_periode()) {
+				self::akhiri_periode();
+			} else {
+				self::mulai_periode();
+			}
+		}
 		$koperasi_data = self::get_data();
 		echo "<h1> Hello, Admin Koperasi </h1>";
 		echo '<div class="wrap woocommerce">';
 		self::output_status($koperasi_data['status']);
+		self::output_periode($koperasi_data['periode']);
 		self::output_dummy_anggota_page($koperasi_data['customers'],$koperasi_data['shu_data']);
 		self::output_settings();
 		echo '</div>';
@@ -88,6 +111,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		$total_penjualan_simulasi = $this->get_option('total_penjualan_simulasi');
 		$persen_jasa_modal = $this->get_option('persen_jasa_modal');
 		$persen_jasa_usaha = $this->get_option('persen_jasa_usaha');
+		$periode = self::get_all_periode();
 		$data =  array(
 			'status' => array(
 				'Anggota Koperasi' => array(
@@ -112,7 +136,8 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 				'total_penjualan_simulasi' => $total_penjualan_simulasi,
 				'persen_jasa_modal' => $persen_jasa_modal,
 				'persen_jasa_usaha' => $persen_jasa_usaha,
-			)
+			),
+			'periode' => $periode
 		);
 		return $data;
 	}
@@ -234,6 +259,87 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		echo '</tbody></table>';
 	}
 
+	function output_periode($periode) {
+		echo "<h2>Cek Periode</h2>";
+		echo '<form method="post" id="mainform" action="" enctype="multipart/form-data">';
+		wp_nonce_field($this->id.'_periode_button_clicked');
+		if (self::is_in_a_periode()) {
+			echo '<input type="submit" value="Akhiri Periode" name="'.$this->id.'_periode_button" />';
+		} else {
+			echo '<input type="submit" value="Mulai Periode" name="'.$this->id.'_periode_button" />';
+		}
+		echo '</form>';
+		echo '
+			<table class="wc_status_table widefat" cellspacing="0" style="width:50%;table-layout:fixed">
+				<col style="width:10%" span="5"/>
+				<thead>
+					<tr>
+					<th colspan="1"><h2> Id</h2></th>
+					<th colspan="3"><h2> Awal </h2></th>
+					<th colspan="3"><h2> Akhir </h2></th>
+					</tr>
+				</thead>
+				<tbody>';
+			if ($periode != null) {
+				foreach ($periode as $key => $value) {
+					echo'	
+						<tr>
+							<td colspan="1">'.$value->id_periode.'</td>
+							<td colspan="3">'.$value->awal_periode.'</td>
+							<td colspan="3">'.$value->akhir_periode.'</td>
+						</tr>
+					';
+				}
+			}
+			echo '</tbody></table>';
+	}
+
+	function get_all_periode() {
+		global $wpdb;
+		$table_name = $wpdb->prefix.'kp_periode';
+		return $wpdb->get_results("SELECT id_periode, awal_periode, akhir_periode FROM $table_name");
+	}
+
+	function is_in_a_periode() {
+		global $wpdb;
+		$table_name = $wpdb->prefix.'kp_periode';
+		$periode_terakhir = $wpdb->get_row("SELECT id_periode, awal_periode, akhir_periode FROM $table_name ORDER BY id_periode DESC LIMIT 1");
+		if ($periode_terakhir == null) {
+			return false;
+		} else if ($periode_terakhir->akhir_periode == null) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	function mulai_periode() {
+		$value_to_insert = array(
+            'awal_periode' => date("Y-m-d H:i:s") 
+        );
+
+        global $wpdb;
+        $table_name = $wpdb->prefix.'kp_periode';
+        $wpdb->insert( 
+            $table_name, 
+            $value_to_insert
+        );
+	}
+
+	function akhiri_periode() {
+		global $wpdb;
+		$table_name = $wpdb->prefix.'kp_periode';
+		$id_periode_terakhir = $wpdb->get_var("SELECT MAX(id_periode) FROM $table_name");
+
+		$wpdb->update( 
+			$table_name, 
+			array(
+				'akhir_periode' => date("Y-m-d H:i:s") 
+			),
+			array( 'id_periode' => $id_periode_terakhir,)
+		);
+	}
+
 	private function calculate_yang_didapat($basis, $shu_simulasi, $persen, $nilai_yang_dikalkulasi) {
 		if ($basis != 0){
 			return ((($persen/100) * $shu_simulasi)/$basis) * $nilai_yang_dikalkulasi ;
@@ -306,7 +412,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
                 'type'        => 'text',
                 'description' => __( '(%)', 'woocommerce' ),
                 'default'     => __( '15', 'woocommerce' )
-            ),
+			),
         );
 
 	}
