@@ -9,6 +9,18 @@ class WC_KP_Simpanan extends WC_KP_Page {
 
     public static function admin_page() {
         echo '<h1>Hello, Admin Simpanan<h1>';
+        echo '<div>';
+        echo '<h3>Semua Simpanan</h3>';
+        $all_simpanan = self::get_all_simpanan();
+        if ($all_simpanan != null) {
+            foreach ($all_simpanan as $key => $pinjaman) {
+                echo '<p>';
+                echo $key.' -> ';
+                print_r($pinjaman);
+                echo '</p>';
+            }
+        }
+        echo '</div>';
     }
 
     public function output_page() {
@@ -118,5 +130,17 @@ class WC_KP_Simpanan extends WC_KP_Page {
 
     public static function is_simpanan_type_correct($type) {
         return $type == 'wajib' || $type == 'pokok' || $type == 'sukarela';
+    }
+
+    public static function get_all_simpanan($type = null) {
+        if ($type == null) {
+            global $wpdb;
+            $table_name = $wpdb->prefix.'kp_simpanan';
+            return $wpdb->get_results("SELECT id_simpanan, user_id, tipe_simpanan, nilai_simpanan, waktu FROM $table_name");
+        } else {
+            global $wpdb;
+            $table_name = $wpdb->prefix.'kp_simpanan';
+            return $wpdb->get_results("SELECT id_simpanan, user_id, tipe_simpanan, nilai_simpanan, waktu FROM $table_name WHERE tipe_simpanan = \"$type\"");
+        }
     }
 }
