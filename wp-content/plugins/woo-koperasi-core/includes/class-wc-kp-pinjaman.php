@@ -10,6 +10,21 @@ class WC_KP_Pinjaman extends WC_KP_Page {
 
     public static function admin_page() {
         echo '<h1>Hello, Admin Pinjaman<h1>';
+        echo '<div>';
+        echo '<h3>Semua Pinjaman</h3>';
+        $all_pinjaman = self::get_all_pinjaman();
+        if ($all_pinjaman != null) {
+            foreach ($all_pinjaman as $key => $pinjaman) {
+                echo '<p>';
+                echo $key.' -> ';
+                print_r($pinjaman);
+                echo '</p>';
+                echo '<p>';
+                echo ' limitasi : '. self::get_pinjaman_limit($pinjaman['user_id'], true);
+                echo '</p>';
+            }
+        }
+        echo '</div>';
     }
 
     public function output_page() {
@@ -33,9 +48,9 @@ class WC_KP_Pinjaman extends WC_KP_Page {
         echo '</b>';
         echo '</p>';
         echo '<h3>Semua Pinjaman</h3>';
-        $all_pinjaman = self::get_all_pinjaman($this->user->ID);
-        if ($all_pinjaman != null) {
-            foreach ($all_pinjaman as $key => $pinjaman) {
+        $pinjaman_user = self::get_pinjaman($this->user->ID);
+        if ($pinjaman_user != null) {
+            foreach ($pinjaman_user as $key => $pinjaman) {
                 echo '<p>';
                 echo $key.' -> ';
                 echo '<pre>';
@@ -125,9 +140,15 @@ class WC_KP_Pinjaman extends WC_KP_Page {
         );
     }
 
-    public static function get_all_pinjaman($user_id) {
+    public static function get_pinjaman($user_id) {
         global $wpdb;
         $table_name = $wpdb->prefix.'kp_pinjaman';
         return $wpdb->get_results("SELECT id_pinjaman ,nilai_pinjaman, batas_akhir, status_pinjaman  FROM $table_name WHERE user_id = $user_id", ARRAY_A );
+    }
+
+    public static function get_all_pinjaman() {
+        global $wpdb;
+        $table_name = $wpdb->prefix.'kp_pinjaman';
+        return $wpdb->get_results("SELECT id_pinjaman , user_id, nilai_pinjaman, batas_akhir, status_pinjaman  FROM $table_name", ARRAY_A );
     }
 }
