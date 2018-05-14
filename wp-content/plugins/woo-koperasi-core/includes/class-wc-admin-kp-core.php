@@ -4,6 +4,7 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	private $koperasi_bank_email;
+	protected $data;
 
     public function __construct() {
 		$this->id = 'koperasi_core';
@@ -82,6 +83,8 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	 * Init the koperasi page.
 	 */
 	public function koperasi_core_page() {
+		$this->data = self::get_data();
+		$koperasi_data = $this->data;
 		// Check whether the button has been pressed AND also check the nonce
 		if (isset($_POST[$this->id.'_button']) && check_admin_referer($this->id.'_button_clicked')) {
 			self::submit_button_action();
@@ -92,8 +95,9 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 			} else {
 				self::mulai_periode();
 			}
+			$this->data = self::get_data();
+			$koperasi_data = $this->data;
 		}
-		$koperasi_data = self::get_data();
 		echo "<h1> Hello, Admin Koperasi </h1>";
 		echo '<div class="wrap woocommerce">';
 		self::output_status($koperasi_data['status']);
@@ -225,8 +229,14 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		$total_penjualan_simulasi = $shu_data['total_penjualan_simulasi'];
 		$simpanan = $shu_data['simpanan_total'];
 		
-
+		$periode = self::get_last_periode();
 		echo "<h2>Cek customer</h2>";
+		if ($periode != null) {
+			$id_periode =  $periode->id_periode;
+		} else {
+			$id_periode = 0;
+		}
+		echo "<h3><i>Pembagian untuk periode ke $id_periode</i></h3>";
 		echo '
 			<table class="wc_status_table widefat" cellspacing="0" style="width:70%;table-layout:fixed">
 				<col style="width:10%" span="7"/>
@@ -300,6 +310,12 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		return $wpdb->get_results("SELECT id_periode, awal_periode, akhir_periode FROM $table_name");
 	}
 
+	function get_last_periode() {
+		global $wpdb;
+		$table_name = $wpdb->prefix.'kp_periode';
+		return $wpdb->get_row("SELECT id_periode, awal_periode, akhir_periode FROM $table_name ORDER BY id_periode DESC LIMIT 1");
+	}
+
 	function is_in_a_periode() {
 		global $wpdb;
 		$table_name = $wpdb->prefix.'kp_periode';
@@ -314,6 +330,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 	}
 
 	function mulai_periode() {
+		self::tarik_simpanan_wajib();
 		$value_to_insert = array(
             'awal_periode' => date("Y-m-d H:i:s") 
         );
@@ -338,6 +355,15 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 			),
 			array( 'id_periode' => $id_periode_terakhir,)
 		);
+	}
+
+	function tarik_simpanan_wajib() {
+		$nilai_simpanan_wajib = $this->get_option('nilai_simpanan_wajib');
+		foreach ($this->data['customers'] as $customer_id => $customer_data) {
+			if ($customer_data['is_a_koperasi_member']) {
+				WC_KP_Simpanan::add_simpanan_member($customer_id, $nilai_simpanan_wajib, 'wajib');
+			}
+		}
 	}
 
 	private function calculate_yang_didapat($basis, $shu_simulasi, $persen, $nilai_yang_dikalkulasi) {
@@ -413,6 +439,12 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
                 'description' => __( '(%)', 'woocommerce' ),
                 'default'     => __( '15', 'woocommerce' )
 			),
+			'nilai_simpanan_wajib' => array(
+                'title'       => __( 'Simpanan Wajib', 'woocommerce' ),
+                'type'        => 'price',
+                'description' => __( 'Simpanan wajib anggota per periode', 'woocommerce' ),
+                'default'     => __( '150000', 'woocommerce' )
+            ),
         );
 
 	}
