@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+
 class WC_KP_Simpanan extends WC_KP_Page {
 
     public function __construct($user = null) {

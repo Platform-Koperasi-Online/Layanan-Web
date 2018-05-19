@@ -1,5 +1,7 @@
 <?php
 
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+
 class WC_KP_Pinjaman extends WC_KP_Page {    
     private static $PINJAMAN_LIMIT = 'pinjaman_limit';
 
