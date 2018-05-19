@@ -14,7 +14,7 @@ Author URI:   github.com/keychera
  * Check if WooCommerce is active
  **/
 if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
-    function koperasi_core() {
+    function koperasi() {
         static $core;
 
         if ( ! isset( $core ) ) {
@@ -26,16 +26,16 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
         return $core;
     }
 
-    function declare_koperasi_core_classes() {
+    function declare_koperasi_classes() {
         foreach (glob(dirname(__FILE__).'/includes/*.php') as $filename)
         {
             require_once($filename);
         }
 
-        koperasi_core();
+        koperasi();
     }
 
-    add_action( 'plugins_loaded', 'declare_koperasi_core_classes', 1000);
+    add_action( 'plugins_loaded', 'declare_koperasi_classes', 1000);
 
     function add_gateway_class( $methods ) {
         $methods[] = 'WC_Gateway_KP_Payment_Gateway'; 
