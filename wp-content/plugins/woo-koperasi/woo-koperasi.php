@@ -18,9 +18,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
         static $core;
 
         if ( ! isset( $core ) ) {
-            require_once( 'includes/class-wc-admin-kp-core.php' );
+            require_once( 'includes/class-wc-kp-core.php' );
 
-            $core = new WC_Admin_KP_Core_Plugin();
+            $core = new WC_KP_Core();
         }
 
         return $core;

@@ -2,69 +2,14 @@
 
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
-class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
-	private $koperasi_bank_email;
-	protected $data;
+class WC_KP_Admin extends WC_Settings_API {
 
-    public function __construct() {
-		$this->id = 'koperasi_core';
-		self::init_koperasi_data();
-		add_action( 'admin_menu', array( $this, 'admin_menu' ), 1000 );
-		add_action( 'init', array( 'WC_KP_Shortcodes', 'init' ) );
-	}
-	
-	private function init_koperasi_data() {
-		global $wpdb;
-
-		$table_name = $wpdb->prefix.'kp_simpanan';
-		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-			//table not in database. Create new table
-			$charset_collate = $wpdb->get_charset_collate();
-
-			$sql = "CREATE TABLE $table_name (
-				id_simpanan mediumint(9) NOT NULL AUTO_INCREMENT,
-				user_id int NOT NULL,
-				tipe_simpanan text NOT NULL,
-				nilai_simpanan numeric(19,4) NOT NULL,
-				waktu datetime NOT NULL,
-				PRIMARY KEY (id_simpanan)
-			) $charset_collate;";
-			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-			dbDelta( $sql );
-		}
-
-		$table_name = $wpdb->prefix.'kp_pinjaman';
-		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-			//table not in database. Create new table
-			$charset_collate = $wpdb->get_charset_collate();
-
-			$sql = "CREATE TABLE $table_name (
-				id_pinjaman mediumint(9) NOT NULL AUTO_INCREMENT,
-				user_id int NOT NULL,
-				nilai_pinjaman numeric(19,4) NOT NULL,
-				batas_akhir date NOT NULL,
-				status_pinjaman text NOT NULL,
-				PRIMARY KEY (id_pinjaman)
-			) $charset_collate;";
-			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-			dbDelta( $sql );
-		}
-
-		$table_name = $wpdb->prefix.'kp_periode';
-		if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) {
-			//table not in database. Create new table
-			$charset_collate = $wpdb->get_charset_collate();
-
-			$sql = "CREATE TABLE $table_name (
-				id_periode mediumint(9) NOT NULL AUTO_INCREMENT,
-				awal_periode datetime NOT NULL,
-				akhir_periode datetime,
-				PRIMARY KEY (id_periode)
-			) $charset_collate;";
-			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-			dbDelta( $sql );
-		}
-	}
+	/**
+	 * Init Admin Page.
+	 */
+    public static function init() {
+		add_action( 'admin_menu', array( new WC_KP_Admin(), 'admin_menu' ), 1000 );
+    }
 
     /**
 	 * Add menu items.
@@ -74,7 +19,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
 		$this->init_form_fields();
 		//add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce', null, null, '55.5' );
 		add_menu_page( __( 'Koperasi', 'woocommerce' ), __( 'WooKoperasi', 'woocommerce' ), 'manage_woocommerce','koperasi_core', null, null, '55.4' );
-		add_submenu_page( 'koperasi_core', __( 'Koperasi', 'woocommerce' ), __( 'Koperasi', 'woocommerce' ), 'manage_woocommerce', 'koperasi_core', array( $this, 'koperasi_core_page' ) );
+		add_submenu_page( 'koperasi_core', __( 'Koperasi', 'woocommerce' ), __( 'Koperasi', 'woocommerce' ), 'manage_woocommerce', 'koperasi_core', array( $this, 'admin_page' ) );
 		add_submenu_page( 'koperasi_core', __( 'Simpanan', 'woocommerce' ), __( 'Simpanan', 'woocommerce' ), 'manage_woocommerce', 'koperasi_core_simpanan', array( new WC_KP_Simpanan(), 'admin_page' ) );
 		add_submenu_page( 'koperasi_core', __( 'Pinjaman', 'woocommerce' ), __( 'Pinjaman', 'woocommerce' ), 'manage_woocommerce', 'koperasi_core_pinjaman', array( new WC_KP_Pinjaman(), 'admin_page' ) );
     }
@@ -82,7 +27,7 @@ class WC_Admin_KP_Core_Plugin extends WC_Settings_API {
     /**
 	 * Init the koperasi page.
 	 */
-	public function koperasi_core_page() {
+	public function admin_page() {
 		$this->data = self::get_data();
 		$koperasi_data = $this->data;
 		// Check whether the button has been pressed AND also check the nonce
